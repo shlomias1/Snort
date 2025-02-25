@@ -1,0 +1,49 @@
+# Local workspace folders that should not be included in Git
+venv/
+.env
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.swp
+
+# Automatically generated dependency files
+*.egg-info/
+dist/
+build/
+*.egg
+*.whl
+
+# IDE configuration files (VS Code, PyCharm, etc.)
+.vscode/
+.idea/
+*.iml
+
+# Log files and temporary files
+logs/
+*.log
+*.tmp
+*.bak
+*.sqlite
+.DS_Store  # קובץ של MacOS שלא נחוץ
+
+# System configuration files
+*.db
+*.pid
+*.lock
+
+# Test results that don't need to be saved in Git
+.coverage
+.tox/
+nosetests.xml
+coverage.xml
+pytest_cache/
+junit.xml
+htmlcov/
+
+# Temporary Jupyter Notebook files
+.ipynb_checkpoints/
+
+# Jupyter notebook files converted to PDF, HTML, etc.
+*.nbconvert.*
