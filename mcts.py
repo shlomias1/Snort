@@ -42,7 +42,7 @@ class MCTSPlayer:
         for _ in range(self.simulations):
             if _ % 350 == 0:
                 log_msg = f"🔄 Running MCTS Simulation {_}/{self.simulations}..."
-                _create_log(log_msg, "Info","game_generation_log.txt")
+                _create_log(log_msg, "Info","snort_game_generation_log.txt")
             node = self._select(root)
             if not node:
                 continue
