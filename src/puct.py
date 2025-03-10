@@ -2,6 +2,8 @@ import math
 import torch
 import config
 import numpy as np
+import random
+from utils import _create_log
 
 class PUCTNode:
     def __init__(self, state, parent=None, move=None, prior_prob=1.0):
@@ -65,9 +67,13 @@ class PUCTPlayer:
     def choose_move(self, game):
         """Perform PUCT search and choose the best move"""
         root = PUCTNode(game.clone())
-        state_tensor = torch.tensor(game.encode(), dtype=torch.float16).unsqueeze(0)
+        state_tensor = torch.tensor(game.encode().flatten(), dtype=torch.float32).unsqueeze(0)
         with torch.no_grad():
             policy_probs, value_estimate = self.network(state_tensor)
+        alpha = config.ALPHA 
+        epsilon = config.EPSILON
+        dirichlet_noise = np.random.dirichlet([alpha] * len(policy_probs))
+        policy_probs = (1 - epsilon) * policy_probs + epsilon * dirichlet_noise
         policy_probs = policy_probs.squeeze(0).detach().cpu().numpy()
         legal_moves = game.legal_moves()
         legal_moves_mask = np.zeros(len(policy_probs))
@@ -84,13 +90,13 @@ class PUCTPlayer:
 
     def _select(self, node):
         """Traverse the tree using PUCT selection until reaching a leaf."""
-        while node.is_fully_expanded():
+        while node.children and node.is_fully_expanded():
             node = node.select_child(self.cpuct)
-        return node
+        return node if node else None
 
     def _evaluate(self, node):
         """ Evaluate a leaf node using the neural network. return: Value estimate (-1 to 1) """
-        state_tensor = torch.tensor(node.state.encode(), dtype=torch.float16).unsqueeze(0)
+        state_tensor = torch.tensor(node.state.encode().flatten(), dtype=torch.float32).unsqueeze(0)
         with torch.no_grad():
             _, value_estimate = self.network(state_tensor)
         return value_estimate.item()
@@ -99,4 +105,5 @@ class PUCTPlayer:
         """ Backpropagate the value estimate up the tree """
         while node:
             node.update(value)
+            value = -value
             node = node.parent
