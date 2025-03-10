@@ -40,9 +40,6 @@ class MCTSPlayer:
     def choose_move(self, game):
         root = MCTSNode(game.clone())
         for _ in range(self.simulations):
-            if _ % 350 == 0:
-                log_msg = f"🔄 Running MCTS Simulation {_}/{self.simulations}..."
-                _create_log(log_msg, "Info","snort_game_generation_log.txt")
             node = self._select(root)
             if not node:
                 continue
@@ -71,23 +68,31 @@ class MCTSPlayer:
                 return child
         return None
 
-    def _simulate(self, game):
+    def _simulate(self, game):   
+        legal_moves_R = set(game.legal_moves())  
+        legal_moves_B = set(game.legal_moves())  
         while game.status() == "ongoing":
-            legal_moves = game.legal_moves()
+            legal_moves = legal_moves_R if game.current_player == "R" else legal_moves_B
             if not legal_moves:
                 return game.status()
-            move = random.choice(legal_moves)
+            move = random.choice(tuple(legal_moves))  
+            legal_moves.discard(move)
             game.make_move(*move)
+            if game.current_player == "B":
+                self._update_legal_moves_set(legal_moves_R, move)
+            else:
+                self._update_legal_moves_set(legal_moves_B, move)
         return game.status()
 
-    def _backpropagate(self, node, result):
-        while node:
-            node.visits += 1
-            if result == f"Winner: {node.state.current_player}":
-                node.wins += 1
-            else:
-                node.wins -= 1
-            node = node.parent
+    def _update_legal_moves_set(self, legal_moves_set, move):
+        row, col = move
+        legal_moves_set.discard(move) 
+        adjacent_positions = [
+            (row - 1, col), (row + 1, col), 
+            (row, col - 1), (row, col + 1)
+        ]
+        for pos in adjacent_positions:
+            legal_moves_set.discard(pos)
 
     def _backpropagate(self, node, result):
         result_value = config.RESULT_MAP.get(result, 0)
