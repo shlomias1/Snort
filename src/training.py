@@ -143,8 +143,7 @@ class Train:
             value_accuracy = (value_correct / total_samples) * 100
             _create_log(f"Epoch {epoch+1}/{self.epochs}, Loss: {loss.item():.4f}, Accuracy: {accuracy:.2f}%, Value Accuracy: {value_accuracy:.2f}%", "Info", "snort_training_log.txt")
             if epoch % 5 == 0:
-                #pretrain = PreTrain(num_games=config.NUM_GAMES_FOR_PUCT, filename="new_games.json")  
-                pretrain = PreTrain(num_games=200, filename="new_games.json")
+                pretrain = PreTrain(num_games=config.NUM_GAMES_FOR_PUCT, filename="new_games.json")  
                 pretrain.generate_self_play_games(self.network)
                 new_games = pretrain.load_games_data()
                 os.remove("new_games.json")
