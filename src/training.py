@@ -37,6 +37,8 @@ class PreTrain:
                     break
                 game.make_move(*move)
                 game_history.append(game.encode())
+            log_message = f"🔄 Generating game {_+1}/{self.num_games} - status: {game.status()}"
+            _create_log(log_message, "Info","snort_game_generation_log.txt")
             status = 1 if game.status() == "Winner: R" else -1 if game.status() == "Winner: B" else 0
             games.append((game_history, status))
             if (_+1) % config.INFO_RETENTION_TIME == 0:
@@ -48,31 +50,47 @@ class PreTrain:
     def load_games_data(self):
         if os.path.exists(self.filename):
             return data_io.load_data_from_JSON(self.filename)
-
+  
     def prepare_training_data(self):
-        if not os.path.exists(self.memmap_file):
-            _create_log(f"❌ Memmap file {self.memmap_file} not found!", "Error")
+        if not os.path.exists(self.filename) or os.path.getsize(self.filename) == 0:
+            _create_log(f"❌ JSON file {self.filename} not found or is empty!", "Error")
+            return None, None, None
+        total_states = 0
+        total_games = 0
+        game_data = [] 
+        try:
+            with open(self.filename, "r") as f:
+                for line in f:
+                    try:
+                        game_entry = json.loads(line.strip())
+                        game_data.append(game_entry)
+                        total_states += len(game_entry["encoded_state"])
+                        total_games += 1
+                    except json.JSONDecodeError as e:
+                        _create_log(f"⚠️ Skipping corrupted line: {e}", "Error")
+                        continue
+        except Exception as e:
+            _create_log(f"⚠️ Error opening JSON file: {e}", "Error")
             return None, None, None
         feature_size = config.FEATURE_VECTOR_SIZE
-        total_states = os.path.getsize(self.memmap_file) // (feature_size * np.dtype("float16").itemsize)
-        inputs = np.memmap(self.memmap_file, dtype="float16", mode="r", shape=(total_states, feature_size))
-        policy_labels = np.memmap("policy_labels.dat", dtype="float16", mode="w+", shape=(total_states, feature_size))
-        value_labels = np.memmap("value_labels.dat", dtype="float16", mode="w+", shape=(total_states,))
+        inputs = np.zeros((total_states, feature_size), dtype="float32")
+        policy_labels = np.zeros((total_states, feature_size), dtype="float32")
+        value_labels = np.zeros((total_states,), dtype="float32")
         state_index = 0
-        with open(self.filename, "r") as f:
-            for line in f:
-                game_entry = json.loads(line.strip())
-                move_counts = game_entry.get("move_counts", {})
-                total_visits = sum(move_counts.values()) if move_counts else 1  
-                for state_vector in game_entry["encoded_state"]:
-                    inputs[state_index] = state_vector  
-                    value_labels[state_index] = game_entry["status"]  
+        for game_entry in game_data:
+            move_counts = game_entry.get("move_counts", {})
+            total_visits = sum(move_counts.values()) if move_counts else 1
+            for state_vector in game_entry["encoded_state"]:
+                flattened_vector = np.array(state_vector).flatten()
+                if flattened_vector.shape[0] == feature_size:
+                    inputs[state_index] = flattened_vector
+                    value_labels[state_index] = game_entry["status"]
                     policy_probs = np.array([move_counts.get(str(i), 0) / total_visits for i in range(feature_size)])
                     policy_labels[state_index] = policy_probs
-                    state_index += 1 
-        policy_labels.flush()
-        value_labels.flush()
-        _create_log(f"✅ Prepared training data from {total_states} states in {self.memmap_file}.", "Info")
+                    state_index += 1
+                else:
+                    _create_log(f"⚠️ Skipping invalid state vector of size {flattened_vector.shape[0]}", "Warning")
+        _create_log(f"✅ Loaded {total_games} games with {total_states} states from {self.filename}.", "Info")
         return inputs, policy_labels, value_labels
   
 class Train:
@@ -85,6 +103,7 @@ class Train:
         self.batch_size = batch_size
         self.red_elo = config.STARTING_ELO
         self.blue_elo = config.STARTING_ELO
+        self.loaded_game_count = 0 
 
     def compute_elo(self, RA, RB, result, K=32):
         EA = 1 / (1 + 10 ** ((RB - RA) / 400))
@@ -111,31 +130,36 @@ class Train:
                 loss = policy_loss + value_loss
                 loss.backward()
                 optimizer.step()
-                predicted_classes = torch.argmax(policy_probs, dim=1)
-                true_classes = torch.argmax(batch_policy_labels, dim=1)
-                correct = (predicted_classes == true_classes).sum().item()
+                top_k = 5  
+                _, predicted_classes = torch.topk(policy_probs, k=top_k, dim=1)
+                _, true_classes = torch.topk(batch_policy_labels, k=top_k, dim=1)
+                correct = sum([1 if set(pred).intersection(set(true)) else 0 for pred, true in zip(predicted_classes, true_classes)])
                 total_correct += correct
+                predicted_value = torch.sign(value_estimate).squeeze()  
+                true_value = torch.sign(batch_value_labels).squeeze()
+                value_correct = (predicted_value == true_value).sum().item()
                 total_samples += batch_policy_labels.shape[0]
             accuracy = (total_correct / total_samples) * 100
-            _create_log(f"Epoch {epoch+1}/{self.epochs}, Loss: {loss.item():.4f}, Accuracy: {accuracy:.2f}%", "Info", "snort_training_log.txt")
+            value_accuracy = (value_correct / total_samples) * 100
+            _create_log(f"Epoch {epoch+1}/{self.epochs}, Loss: {loss.item():.4f}, Accuracy: {accuracy:.2f}%, Value Accuracy: {value_accuracy:.2f}%", "Info", "snort_training_log.txt")
             if epoch % 5 == 0:
-                pretrain = PreTrain(num_games=500)  
+                #pretrain = PreTrain(num_games=config.NUM_GAMES_FOR_PUCT, filename="new_games.json")  
+                pretrain = PreTrain(num_games=200, filename="new_games.json")
                 pretrain.generate_self_play_games(self.network)
                 new_games = pretrain.load_games_data()
-                new_inputs, new_policy_labels, new_value_labels = pretrain.prepare_training_data()
-                if new_inputs is not None:
+                os.remove("new_games.json")
+                if new_games is not None:
+                    new_inputs, new_policy_labels, new_value_labels = new_games
                     self.inputs = np.concatenate((self.inputs, new_inputs))
                     self.policy_labels = np.concatenate((self.policy_labels, new_policy_labels))
                     self.value_labels = np.concatenate((self.value_labels, new_value_labels))
-                trainer = Train(self.network, new_inputs, new_policy_labels, new_value_labels)
-                trainer.train()
-                for game_data in new_games:
-                    if game_data["status"] == 1:  # Red wins
+                for i in range(len(new_value_labels)):
+                    game_status = new_value_labels[i]
+                    if game_status  == 1:  # status = Red wins
                         self.red_elo, self.blue_elo = self.compute_elo(self.red_elo, self.blue_elo, 1)
-                    elif game_data["status"] == -1:  # Blue wins
+                    elif game_status  == -1:  # status = Blue wins
                         self.red_elo, self.blue_elo = self.compute_elo(self.red_elo, self.blue_elo, 0)
                     else:  # Draw
                         self.red_elo, self.blue_elo = self.compute_elo(self.red_elo, self.blue_elo, 0.5)
-
                 _create_log(f"🔢 Updated ELO Ratings: Red = {self.red_elo:.2f}, Blue = {self.blue_elo:.2f}", "Info", "snort_training_log.txt")
         self.network.save_model("trained_snort_game_network.pth")
