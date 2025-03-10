@@ -14,20 +14,17 @@ def main():
         pretrain.generate_self_play_games()
         games_data = pretrain.load_games_data()
     if games_data is None or len(games_data) == 0:
-        log_message = "No game data generated."
-        _create_log(log_message, "Error")
+        _create_log("No game data generated.", "Error")
         return
-    inputs, policy_labels, value_labels = pretrain.prepare_training_data()
+    # inputs, policy_labels, value_labels = pretrain.prepare_training_data()
+    inputs, policy_labels, value_labels = games_data
     if inputs is None or policy_labels is None or value_labels is None:
-        log_message = "Training data was not prepared correctly."
-        _create_log(log_message, "Error")
-        print(log_message)
+        _create_log("Training data was not prepared correctly.", "Error")
         return
     game = Snort()
     legal_moves = game.legal_moves()
     if not legal_moves:
-        log_message = "No legal moves available at the start of the game."
-        _create_log(log_message, "Error")
+        _create_log("No legal moves available at the start of the game.", "Error")
         return
     network = GameNetwork(input_dim=inputs.shape[1], policy_output_dim=len(policy_labels[0]) , value_output_dim=1)
     trainer = Train(network, inputs, policy_labels, value_labels, epochs=config.EPOCHS, batch_size=config.BATCH_SIZE)
