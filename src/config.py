@@ -9,6 +9,7 @@ HIDDEN_LAYER_SIZE = 256
 FEATURE_VECTOR_SIZE = 400
 # Parameters for Genroot Games
 NUM_GAMES = 10000
+NUM_GAMES_FOR_PUCT = 500
 # Parameters for MCTS and PUCT
 INFO_RETENTION_TIME = 5
 MCTS_SIMULATIONS = 700
@@ -19,6 +20,9 @@ RESULT_MAP = {
     "Winner: B": -1  # Blue Victory → -1
 }
 CPUCT = 1.0
+STARTING_ELO = 1200
+ALPHA = 0.3
+EPSILON = 0.25
 #dirs
 DATA_DIR = "data"
 LOG_DIR = "snort_logs"
