@@ -16,8 +16,7 @@ def main():
     if games_data is None or len(games_data) == 0:
         _create_log("No game data generated.", "Error")
         return
-    # inputs, policy_labels, value_labels = pretrain.prepare_training_data()
-    inputs, policy_labels, value_labels = games_data
+    inputs, policy_labels, value_labels = pretrain.prepare_training_data(games_data)
     if inputs is None or policy_labels is None or value_labels is None:
         _create_log("Training data was not prepared correctly.", "Error")
         return
