@@ -19,7 +19,7 @@ RESULT_MAP = {
     "Winner: R": 1,    # Red Victory → 1
     "Winner: B": -1  # Blue Victory → -1
 }
-CPUCT = 1.0
+CPUCT = 0.5
 STARTING_ELO = 1200
 ALPHA = 0.3
 EPSILON = 0.25
