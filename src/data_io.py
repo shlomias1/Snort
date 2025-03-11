@@ -74,14 +74,12 @@ def load_data_from_JSON_using_memfile(filename, memmap_file="snort_games_memmap.
         return None
     inputs_memmap.flush()
     _create_log(f"✅ Loaded {total_states} states from {filename} into {memmap_file}.", "Info")
-    return inputs_memmap 
+    return inputs_memmap
 
 def load_data_from_JSON(filename):
     if not os.path.exists(filename) or os.path.getsize(filename) == 0:
         _create_log("❌ No saved games found or file is empty, generating new games...", "Warning")
-        return None, None, None
-    total_states = 0
-    total_games = 0
+        return None
     game_data = []
     try:
         with open(filename, "r") as f:
@@ -89,32 +87,12 @@ def load_data_from_JSON(filename):
                 try:
                     game_entry = json.loads(line.strip())
                     game_data.append(game_entry)
-                    total_states += len(game_entry["encoded_state"])
-                    total_games +=1
                 except json.JSONDecodeError as e:
                     _create_log(f"⚠️ Skipping corrupted line: {e}", "Error")
                     continue
     except Exception as e:
         _create_log(f"⚠️ Error opening JSON file: {e}", "Error")
-        return None, None, None
-    feature_size = config.FEATURE_VECTOR_SIZE
-    inputs = np.zeros((total_states, feature_size), dtype="float32")
-    policy_labels = np.zeros((total_states, feature_size), dtype="float32")
-    value_labels = np.zeros((total_states,), dtype="float32")
-    state_index = 0
-    for game_entry in game_data:
-        move_counts = game_entry.get("move_counts", {})
-        total_visits = sum(move_counts.values()) if move_counts else 1
-        for state_vector in game_entry["encoded_state"]:
-            flattened_vector = np.array(state_vector).flatten()
-            if flattened_vector.shape[0] == feature_size:
-                inputs[state_index] = flattened_vector
-                value_labels[state_index] = game_entry["status"]
-                policy_probs = np.array([move_counts.get(str(i), 0) / total_visits for i in range(feature_size)])
-                policy_labels[state_index] = policy_probs
-                state_index += 1
-            else:
-                _create_log(f"⚠️ Skipping invalid state vector of size {flattened_vector.shape[0]}", "Warning")
-
-    _create_log(f"✅ Loaded {total_games} games with {total_states} states from {filename}.", "Info")
-    return inputs, policy_labels, value_labels
+        return None
+    
+    _create_log(f"✅ Loaded {len(game_data)} games from {filename}.", "Info")
+    return game_data
