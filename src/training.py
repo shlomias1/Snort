@@ -50,28 +50,13 @@ class PreTrain:
     def load_games_data(self):
         if os.path.exists(self.filename):
             return data_io.load_data_from_JSON(self.filename)
-  
-    def prepare_training_data(self):
-        if not os.path.exists(self.filename) or os.path.getsize(self.filename) == 0:
-            _create_log(f"❌ JSON file {self.filename} not found or is empty!", "Error")
+
+    def prepare_training_data(self, game_data):
+        if not game_data:
+            _create_log("❌ No valid game data provided!", "Error")
             return None, None, None
-        total_states = 0
-        total_games = 0
-        game_data = [] 
-        try:
-            with open(self.filename, "r") as f:
-                for line in f:
-                    try:
-                        game_entry = json.loads(line.strip())
-                        game_data.append(game_entry)
-                        total_states += len(game_entry["encoded_state"])
-                        total_games += 1
-                    except json.JSONDecodeError as e:
-                        _create_log(f"⚠️ Skipping corrupted line: {e}", "Error")
-                        continue
-        except Exception as e:
-            _create_log(f"⚠️ Error opening JSON file: {e}", "Error")
-            return None, None, None
+        total_states = sum(len(game["encoded_state"]) for game in game_data)
+        total_games = len(game_data)
         feature_size = config.FEATURE_VECTOR_SIZE
         inputs = np.zeros((total_states, feature_size), dtype="float32")
         policy_labels = np.zeros((total_states, feature_size), dtype="float32")
@@ -80,6 +65,7 @@ class PreTrain:
         for game_entry in game_data:
             move_counts = game_entry.get("move_counts", {})
             total_visits = sum(move_counts.values()) if move_counts else 1
+            
             for state_vector in game_entry["encoded_state"]:
                 flattened_vector = np.array(state_vector).flatten()
                 if flattened_vector.shape[0] == feature_size:
@@ -90,9 +76,9 @@ class PreTrain:
                     state_index += 1
                 else:
                     _create_log(f"⚠️ Skipping invalid state vector of size {flattened_vector.shape[0]}", "Warning")
-        _create_log(f"✅ Loaded {total_games} games with {total_states} states from {self.filename}.", "Info")
+        _create_log(f"✅ Processed {total_games} games with {total_states} states.", "Info")
         return inputs, policy_labels, value_labels
-  
+
 class Train:
     def __init__(self, network, inputs, policy_labels, value_labels, epochs=10, batch_size=16):
         self.network = network
@@ -143,7 +129,8 @@ class Train:
             value_accuracy = (value_correct / total_samples) * 100
             _create_log(f"Epoch {epoch+1}/{self.epochs}, Loss: {loss.item():.4f}, Accuracy: {accuracy:.2f}%, Value Accuracy: {value_accuracy:.2f}%", "Info", "snort_training_log.txt")
             if epoch % 5 == 0:
-                pretrain = PreTrain(num_games=config.NUM_GAMES_FOR_PUCT, filename="new_games.json")  
+                #pretrain = PreTrain(num_games=config.NUM_GAMES_FOR_PUCT, filename="new_games.json")  
+                pretrain = PreTrain(num_games=200, filename="new_games.json")
                 pretrain.generate_self_play_games(self.network)
                 new_games = pretrain.load_games_data()
                 os.remove("new_games.json")
