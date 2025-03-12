@@ -25,8 +25,10 @@ class MCTSNode:
         best_child = None
         for child in self.children:
             if child.visits == 0:
-                continue
-            uct_value = (child.wins / child.visits) + exploration_weight * math.sqrt(math.log(self.visits) / child.visits)
+                return child
+            uct_value = (child.wins / child.visits) + exploration_weight * math.sqrt(math.log(self.visits) / 1+ child.visits)
+            # Added Exploration Bonus - gives priority to less controlled nodes
+            uct_value += 0.1 * (1 - child.visits / max(1, self.visits))
             if uct_value > best_value:
                 best_value = uct_value
                 best_child = child
@@ -69,36 +71,19 @@ class MCTSPlayer:
         return None
 
     def _simulate(self, game):   
-        legal_moves_R = set(game.legal_moves())  
-        legal_moves_B = set(game.legal_moves())  
         while game.status() == "ongoing":
-            legal_moves = legal_moves_R if game.current_player == "R" else legal_moves_B
+            legal_moves = game.legal_moves() # O(n^2)
             if not legal_moves:
                 return game.status()
-            move = random.choice(tuple(legal_moves))  
-            legal_moves.discard(move)
+            move = random.choice(legal_moves) # O(1)
             game.make_move(*move)
-            if game.current_player == "B":
-                self._update_legal_moves_set(legal_moves_R, move)
-            else:
-                self._update_legal_moves_set(legal_moves_B, move)
         return game.status()
-
-    def _update_legal_moves_set(self, legal_moves_set, move):
-        row, col = move
-        legal_moves_set.discard(move) 
-        adjacent_positions = [
-            (row - 1, col), (row + 1, col), 
-            (row, col - 1), (row, col + 1)
-        ]
-        for pos in adjacent_positions:
-            legal_moves_set.discard(pos)
 
     def _backpropagate(self, node, result):
         result_value = config.RESULT_MAP.get(result, 0)
         while node:
             node.visits += 1
-            if ": " in result:
+            if ": " in result: # Winner: player
                 result = result.split(": ")[1] 
             if result == "R":
                 node.wins += result_value
