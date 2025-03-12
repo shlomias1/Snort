@@ -3,7 +3,6 @@ import torch
 import config
 import numpy as np
 import random
-from utils import _create_log
 
 class PUCTNode:
     def __init__(self, state, parent=None, move=None, prior_prob=1.0):
@@ -59,7 +58,7 @@ class PUCTNode:
         return max(self.children.values(), key=lambda c: c.N, default=None)
 
 class PUCTPlayer:
-    def __init__(self, network, simulations = 700, cpuct = config.CPUCT):
+    def __init__(self, network, simulations = 700, cpuct = 1.5):
         self.network = network
         self.simulations = simulations
         self.cpuct = cpuct
@@ -77,16 +76,28 @@ class PUCTPlayer:
         policy_probs = policy_probs.squeeze(0).detach().cpu().numpy()
         legal_moves = game.legal_moves()
         legal_moves_mask = np.zeros(len(policy_probs))
-        for idx, move in enumerate(legal_moves):
-            legal_moves_mask[idx] = policy_probs[idx]
-        legal_moves_mask /= np.sum(legal_moves_mask) if np.sum(legal_moves_mask) > 0 else np.ones(len(legal_moves)) / len(legal_moves)
+        for move in legal_moves:
+            move_index = game.get_move_index(move) # Returns the correct index.
+            legal_moves_mask[move_index] = policy_probs[move_index]
+        if np.sum(legal_moves_mask) > 0:
+            legal_moves_mask /= np.sum(legal_moves_mask)
+        elif len(legal_moves) > 0:
+            legal_moves_mask[:] = 1 / len(legal_moves)
+        else:
+            return None
         root.expand(game, legal_moves_mask)
         root.update(value_estimate.item())
         for _ in range(self.simulations):
             node = self._select(root)
             value = self._evaluate(node)
             self._backpropagate(node, value)
-        return root.best_child().move if root.best_child() else random.choice(legal_moves)
+        best_child = root.best_child()
+        if best_child and best_child.move is not None:
+            return best_child.move
+        elif legal_moves: 
+            return random.choice(legal_moves)
+        else:
+            return None
 
     def _select(self, node):
         """Traverse the tree using PUCT selection until reaching a leaf."""
@@ -105,5 +116,6 @@ class PUCTPlayer:
         """ Backpropagate the value estimate up the tree """
         while node:
             node.update(value)
-            value = -value
+            if node.parent:  # Only transform if there is a parent
+                value = -value
             node = node.parent
