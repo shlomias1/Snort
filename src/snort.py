@@ -48,25 +48,40 @@ class Snort:
         return copy.deepcopy(self)
 
     def encode(self):
-        """ Encode the game state as a binary vector including player turn """
-        encoding = np.zeros((self.size, self.size, 4))  # 4 channels: R, B, blocked, current player
+        """ Encode the game state as a binary vector including player turn and legal moves """
+        encoding = np.zeros((self.size, self.size, config.NUM_CHANNELS), dtype=np.float32)  # 6 channels: R, B, blocked, current player, legal moves for R, legal moves for B
         for r in range(self.size):
             for c in range(self.size):
                 if self.board[r, c] == "R":
-                    encoding[r, c, 0] = 1
+                    encoding[r, c, 0] = 1  # R pieces
                 elif self.board[r, c] == "B":
-                    encoding[r, c, 1] = 1
+                    encoding[r, c, 1] = 1  # B pieces
                 elif (r, c) in self.blocked_cells:
-                    encoding[r, c, 2] = 1
+                    encoding[r, c, 2] = 1  # Blocked cells
         encoding[:, :, 3] = 1 if self.current_player == "R" else 0
+        legal_moves = self.legal_moves()
+        for move in legal_moves:
+            r, c = move
+            if self.current_player == "R":
+                encoding[r, c, 4] = 1 
+            else:
+                encoding[r, c, 5] = 1
         return encoding
 
     def decode(self, action_index):
-        """ Translate an action index into a move """
+        """ Translate an action index into a move and check if it's valid """
+        if action_index < 0 or action_index >= self.size * self.size:
+            raise ValueError(f"Invalid action index: {action_index}")
         row = action_index // self.size
         col = action_index % self.size
+        if not self.is_legal_move(row, col):
+            raise ValueError(f"Decoded move ({row}, {col}) is illegal!")
         return row, col
 
+    def get_move_index(self, move):
+        """ Translate a move into an action index """
+        return move[0] * self.size + move[1]
+    
     def status(self):
         """ Return the game result or indicate that the game is ongoing """
         if not self.legal_moves():
@@ -88,7 +103,9 @@ class Snort:
 
     def legal_moves(self):
         """ Return a list of all legal moves """
-        return [(r, c) for r in range(self.size) for c in range(self.size) if self.is_legal_move(r, c)]
+        moves = [(r, c) for r in range(self.size) for c in range(self.size) if self.is_legal_move(r, c)]
+        random.shuffle(moves)
+        return moves
 
     def __str__(self):
         board_representation = "  " + " ".join(str(i) for i in range(self.size)) + "\n"
