@@ -1,0 +1,60 @@
+Info : Epoch 1/50, Loss: 0.6441, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-13 18:49:06 
+Info : 🔢 Updated ELO Ratings: Red = 1601.59, Blue = 798.41 | 2025-03-14 00:02:06 
+Info : Epoch 2/50, Loss: 0.0125, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 00:03:36 
+Info : Epoch 3/50, Loss: 0.0035, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 00:05:09 
+Info : Epoch 4/50, Loss: 0.0095, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 00:06:50 
+Info : Epoch 5/50, Loss: 0.0294, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 00:08:31 
+Info : Epoch 6/50, Loss: 0.0177, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 00:10:11 
+Info : 🔢 Updated ELO Ratings: Red = 1651.86, Blue = 748.14 | 2025-03-14 05:05:58 
+Info : Epoch 7/50, Loss: 0.1694, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 05:07:43 
+Info : Epoch 8/50, Loss: 0.3623, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 05:09:26 
+Info : Epoch 9/50, Loss: 0.4014, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 05:11:08 
+Info : Epoch 10/50, Loss: 0.3640, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 05:12:50 
+Info : Epoch 11/50, Loss: 0.2980, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 05:14:32 
+Info : 🔢 Updated ELO Ratings: Red = 1472.39, Blue = 927.61 | 2025-03-14 10:09:52 
+Info : Epoch 12/50, Loss: 0.5126, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 10:11:39 
+Info : Epoch 13/50, Loss: 0.5611, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 10:13:25 
+Info : Epoch 14/50, Loss: 0.5246, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 10:15:11 
+Info : Epoch 15/50, Loss: 0.3752, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 10:16:58 
+Info : Epoch 16/50, Loss: 0.4899, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 10:18:43 
+Info : 🔢 Updated ELO Ratings: Red = 1581.90, Blue = 818.10 | 2025-03-14 15:15:09 
+Info : Epoch 17/50, Loss: 0.0265, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 15:17:01 
+Info : Epoch 18/50, Loss: 0.0050, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 15:18:52 
+Info : Epoch 19/50, Loss: 0.0767, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 15:20:42 
+Info : Epoch 20/50, Loss: 0.0103, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 15:22:33 
+Info : Epoch 21/50, Loss: 0.0077, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 15:24:23 
+Info : 🔢 Updated ELO Ratings: Red = 1567.58, Blue = 832.42 | 2025-03-14 20:35:57 
+Info : Epoch 22/50, Loss: 0.4180, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 20:38:03 
+Info : Epoch 23/50, Loss: 0.4344, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 20:40:09 
+Info : Epoch 24/50, Loss: 0.4460, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 20:42:15 
+Info : Epoch 25/50, Loss: 0.3823, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 20:44:20 
+Info : Epoch 26/50, Loss: 0.3687, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-14 20:46:26 
+Info : 🔢 Updated ELO Ratings: Red = 1546.12, Blue = 853.88 | 2025-03-15 01:56:59 
+Info : Epoch 27/50, Loss: 0.1433, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 01:59:09 
+Info : Epoch 28/50, Loss: 0.1466, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 02:01:19 
+Info : Epoch 29/50, Loss: 0.1497, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 02:03:28 
+Info : Epoch 30/50, Loss: 0.1535, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 02:05:38 
+Info : Epoch 31/50, Loss: 0.1525, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 02:07:47 
+Info : 🔢 Updated ELO Ratings: Red = 1403.65, Blue = 996.35 | 2025-03-15 07:16:29 
+Info : Epoch 32/50, Loss: 0.2422, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 07:18:43 
+Info : Epoch 33/50, Loss: 0.0706, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 07:20:57 
+Info : Epoch 34/50, Loss: 0.0468, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 07:23:10 
+Info : Epoch 35/50, Loss: 0.0766, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 07:25:24 
+Info : Epoch 36/50, Loss: 0.0027, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 07:27:38 
+Info : 🔢 Updated ELO Ratings: Red = 1473.04, Blue = 926.96 | 2025-03-15 12:37:17 
+Info : Epoch 37/50, Loss: 0.2142, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 12:39:37 
+Info : Epoch 38/50, Loss: 0.1773, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 12:41:56 
+Info : Epoch 39/50, Loss: 0.1243, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 12:44:14 
+Info : Epoch 40/50, Loss: 0.0717, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 12:46:33 
+Info : Epoch 41/50, Loss: 0.1088, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 12:48:52 
+Info : 🔢 Updated ELO Ratings: Red = 991.04, Blue = 1408.96 | 2025-03-15 17:53:37 
+Info : Epoch 42/50, Loss: 1.9764, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 17:55:52 
+Info : Epoch 43/50, Loss: 1.9363, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 17:58:06 
+Info : Epoch 44/50, Loss: 1.9224, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 18:00:21 
+Info : Epoch 45/50, Loss: 1.9483, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 18:02:35 
+Info : Epoch 46/50, Loss: 1.9248, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 18:04:49 
+Info : 🔢 Updated ELO Ratings: Red = 1536.59, Blue = 863.41 | 2025-03-15 23:01:37 
+Info : Epoch 47/50, Loss: 0.0923, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 23:03:51 
+Info : Epoch 48/50, Loss: 0.0276, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 23:06:05 
+Info : Epoch 49/50, Loss: 0.0837, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 23:08:20 
+Info : Epoch 50/50, Loss: 0.0009, Accuracy: 0.00%, Value Accuracy: 0.00% | 2025-03-15 23:10:34 
