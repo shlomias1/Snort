@@ -27,8 +27,6 @@ class MCTSNode:
             if child.visits == 0:
                 return child
             uct_value = (child.wins / child.visits) + exploration_weight * math.sqrt(math.log(self.visits) / 1+ child.visits)
-            # Added Exploration Bonus - gives priority to less controlled nodes
-            uct_value += 0.1 * (1 - child.visits / max(1, self.visits))
             if uct_value > best_value:
                 best_value = uct_value
                 best_child = child
@@ -81,13 +79,11 @@ class MCTSPlayer:
 
     def _backpropagate(self, node, result):
         result_value = config.RESULT_MAP.get(result, 0)
+        result = result.split(": ")[1] if ": " in result else result
+        if node.state.current_player == "R":
+            result_value = -result_value
         while node:
             node.visits += 1
-            if ": " in result: # Winner: player
-                result = result.split(": ")[1] 
-            if result == "R":
-                node.wins += result_value
-            else:
-                node.wins -= result_value
+            node.wins += result_value
             result_value = -result_value
             node = node.parent
